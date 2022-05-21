@@ -5,7 +5,7 @@ module.exports = {
     username: process.env.SEQUELIZE_USERNAME,
     password: process.env.SEQUELIZE_PASSWORD,
     database: 'DeliTo_development',
-    host: '127.0.0.1',
+    host: process.env.SEQUELIZE_HOST,
     dialect: 'mysql',
     //logging: false,
   },
