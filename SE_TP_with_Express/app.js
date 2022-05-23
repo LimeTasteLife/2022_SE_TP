@@ -14,7 +14,7 @@ const testInitialRouter = require('./routes/testInitial');
 const app = express();
 app.set('port', process.env.PORT || 3000);
 sequelize
-  .sync({ alter: true })
+  .sync({})
   .then(() => {
     console.log('Success to connect DB');
   })

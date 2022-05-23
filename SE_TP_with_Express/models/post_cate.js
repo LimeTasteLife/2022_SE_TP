@@ -17,5 +17,8 @@ module.exports = class Post_cate extends Sequelize.Model {
     );
   }
 
-  static associate(db) {}
+  static associate(db) {
+    Post_cate.belongsTo(db.Post);
+    Post_cate.belongsTo(db.Category);
+  }
 };

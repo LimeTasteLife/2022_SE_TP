@@ -1,34 +1,38 @@
 const express = require('express');
-const { Post, Category, User } = require('../models');
+const { Post, sequelize, Post_content } = require('../models');
+const { QueryTypes } = require('sequelize');
 
 const router = express.Router();
 
+const Query_Get_Post_Category =
+  'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.lat, p.long FROM post p JOIN post_cate pc ON p.id = pc.post_id JOIN category c ON c.id = pc.category_id WHERE c.name = :cate ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
+const Query_Get_Post_User =
+  'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.lat, p.long FROM post p JOIN user_post up ON p.id = up.post_id JOIN user u ON u.id = up.user_id WHERE u.id = :user_id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
 // get post lists with category
 router.get('/category', async (req, res, next) => {
   try {
     const { category, pageNum } = req.query;
-    if (!pageNum) pageNum = 0;
-    const findPostwithCategory = await Post.findAll({
-      include: [
-        {
-          model: Category,
-          where: {
-            category: category,
-          },
-        },
-      ],
-      order: [['createdAt'], ['DESC']],
-      limit: 10,
-      offset: pageNum,
-    });
+    if (!category) {
+      res.status(400).json({
+        log: 'wrong input',
+      });
+    }
+    const cate = decodeURIComponent(category);
+
+    const findPostwithCategory = await sequelize.query(
+      Query_Get_Post_Category,
+      {
+        replacements: { cate: cate, limit: 10, offset: parseInt(pageNum) },
+        type: QueryTypes.SELECT,
+      }
+    );
     if (!findPostwithCategory) {
       res.status(500).json({
         log: 'no post found',
       });
     } else {
-      res.status(200).json(findPostwithCategory, {
-        log: 'post load success',
-      });
+      console.log(findPostwithCategory);
+      res.status(200).json(findPostwithCategory);
     }
   } catch (err) {
     console.error(err);
@@ -43,27 +47,20 @@ router.get('/user', async (req, res, next) => {
   try {
     const { user_id, pageNum } = req.query;
     if (!pageNum) pageNum = 0;
-    const findPostwithCategory = await Post.findAll({
-      include: [
-        {
-          model: User,
-          where: {
-            user_id: user_id,
-          },
-        },
-      ],
-      order: [['createdAt'], ['DESC']],
-      limit: 10,
-      offset: pageNum,
+    const findPostwithUser = await sequelize.query(Query_Get_Post_User, {
+      replacements: {
+        user_id: parseInt(user_id),
+        limit: 10,
+        offset: parseInt(pageNum),
+      },
+      type: QueryTypes.SELECT,
     });
-    if (!findPostwithCategory) {
+    if (!findPostwithUser) {
       res.status(500).json({
         log: 'no post found',
       });
     } else {
-      res.status(200).json(findPostwithCategory, {
-        log: 'post load success',
-      });
+      res.status(200).json(findPostwithUser);
     }
   } catch (err) {
     console.error(err);
@@ -83,27 +80,33 @@ router.post('/', async (req, res, next) => {
       mem_count,
       rest_id,
       user_id,
+      category_id,
       lat,
       long,
     } = req.body.post;
-    const createPostData = await Post.create({
-      title: title,
-      restaurant_id: parseInt(rest_id),
-      lat: parseFloat(lat),
-      long: parseFloat(long),
-      mem_count: parseInt(mem_count),
-    });
-    const creatPostContentData = await Post_content.create({
-      post_id: createPostData.id,
-      user_id: parseInt(user_id),
-      delivery_fee: parseInt(delivery_fee),
-      content: content,
-    });
-    if (!createPostData || !creatPostContentData) {
+    const createPostData = await Post.create(
+      {
+        title: title,
+        restaurant_id: parseInt(rest_id),
+        lat: parseFloat(lat),
+        long: parseFloat(long),
+        mem_count: parseInt(mem_count),
+        Post_content: {
+          user_id: parseInt(user_id),
+          delivery_fee: parseInt(delivery_fee),
+          content: content,
+        },
+      },
+      {
+        include: [{ model: Post_content }],
+      }
+    );
+    if (!createPostData) {
       res.status(400).json({
         log: 'making post failure',
       });
     } else {
+      await createPostData.addCategory(parseInt(category_id));
       await createPostData.addUser(parseInt(user_id));
       res.status(200).json({
         log: 'post insert success',
@@ -118,7 +121,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // updating post
-router.patch('/', async (req, res, next) => {
+router.put('/', async (req, res, next) => {
   try {
     const {
       id,
@@ -158,6 +161,17 @@ router.patch('/', async (req, res, next) => {
     console.error(err);
     res.status(500).json({
       log: 'post update failure',
+    });
+  }
+});
+
+router.delete('/', async (req, res, next) => {
+  try {
+    const { post_id } = req.body;
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      log: 'post delete failure',
     });
   }
 });

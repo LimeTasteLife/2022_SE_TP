@@ -17,5 +17,8 @@ module.exports = class Rest_cate extends Sequelize.Model {
     );
   }
 
-  static associate(db) {}
+  static associate(db) {
+    Rest_cate.belongsTo(db.Restaurant);
+    Rest_cate.belongsTo(db.Category);
+  }
 };

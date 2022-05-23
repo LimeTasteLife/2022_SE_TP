@@ -11,7 +11,7 @@ module.exports = class User extends Sequelize.Model {
         },
         password: {
           type: Sequelize.STRING(100), // 암호화한 결과값 생각.
-          allowNull: true,
+          allowNull: false,
         },
         name: {
           type: Sequelize.STRING(20), // 20byte 제한.

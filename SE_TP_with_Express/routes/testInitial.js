@@ -8,8 +8,8 @@ const router = express.Router();
 router.use(async (req, res, next) => {
   console.log('Test Initializing ...');
   await insertingTestUserData();
-  await insertingTestPostData();
   await insertingTestRestaurantData();
+  await insertingTestPostData();
   console.log('Test Initializing finished.');
   next();
 });

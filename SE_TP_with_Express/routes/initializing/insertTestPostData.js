@@ -1,5 +1,6 @@
 const fs = require('fs');
-const { Post, Post_content } = require('../../models');
+const { Post, Post_content, Post_cate, sequelize } = require('../../models');
+const { QueryTypes } = require('sequelize');
 
 module.exports = async function insertingTestPostData() {
   try {
@@ -20,7 +21,9 @@ module.exports = async function insertingTestPostData() {
       }
     );
     await new Promise((resolve, reject) => setTimeout(resolve, 5000));
+
     await justConnecting();
+    await justConnecting2();
     return;
   } catch (err) {
     console.error(err);
@@ -104,6 +107,32 @@ async function justConnecting() {
     await p6.addUser(3);
     //console.log(p1, p2, p3, p4, p6);
     console.log('finished');
+    return;
+  } catch (err) {
+    console.error(err);
+    return;
+  }
+}
+
+const query =
+  'SELECT rc.category_id FROM post p JOIN restaurant r ON p.restaurant_id = r.id JOIN rest_cate rc ON r.id = rc.restaurant_id WHERE p.id = :id';
+async function justConnecting2() {
+  try {
+    for (i = 1; i <= 6; i++) {
+      const findCategory = await sequelize.query(query, {
+        replacements: { id: i },
+        type: QueryTypes.SELECT,
+      });
+      const findPost = await Post.findOne({
+        where: {
+          id: i,
+        },
+      });
+      console.log(findPost);
+      for await (item of findCategory) {
+        await findPost.addCategory(item.category_id);
+      }
+    }
     return;
   } catch (err) {
     console.error(err);

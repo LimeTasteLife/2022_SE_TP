@@ -22,6 +22,10 @@ module.exports = class Report extends Sequelize.Model {
           type: Sequelize.INTEGER.UNSIGNED,
           allowNull: false,
         },
+        user_id: {
+          type: Sequelize.INTEGER.UNSIGNED,
+          allowNull: false,
+        },
       },
       {
         sequelize,
@@ -37,6 +41,6 @@ module.exports = class Report extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Report.belongsTo(db.User);
+    db.Report.belongsTo(db.User, { foreignKey: 'user_id', sourceKey: 'id' });
   }
 };

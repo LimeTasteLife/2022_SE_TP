@@ -52,7 +52,7 @@ Comment.associate(db);
 Menu.associate(db);
 Post.associate(db);
 Post_cate.associate(db);
-//Post_content.associate(db);
+Post_content.associate(db);
 Report.associate(db);
 Restaurant.associate(db);
 Rest_cate.associate(db);

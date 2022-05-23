@@ -1,34 +1,37 @@
 const express = require('express');
-const { Restaurant, Category, Menu } = require('../models');
+const { Restaurant, Category, Menu, sequelize } = require('../models');
+const { QueryTypes } = require('sequelize');
 
 const router = express.Router();
+
+const Query_Get_Restaurant_Category =
+  'SELECT r.id, r.name, r.review_avg, r.begin, r.end, r.min_order_amount, r.delivery_fee, r.delivery_time, r.phone, r.address, r.url, r.lat, r.lng FROM restaurant r JOIN rest_cate rc ON r.id = rc.restaurant_id JOIN category c ON c.id = rc.category_id WHERE c.name = :cate ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset';
 
 // get restaurant lists with category
 router.get('/category', async (req, res, next) => {
   try {
     const { category, pageNum } = req.query;
+    if (!category) {
+      res.status(400).json({
+        log: 'wrong input',
+      });
+    }
     if (!pageNum) pageNum = 0;
-    const findRestaurantwithCategory = await Restaurant.findAll({
-      include: [
-        {
-          model: Category,
-          where: {
-            category: category,
-          },
-        },
-      ],
-      order: [['createdAt'], ['DESC']],
-      limit: 10,
-      offset: pageNum,
-    });
+    const cate = decodeURIComponent(category);
+
+    const findRestaurantwithCategory = await sequelize.query(
+      Query_Get_Restaurant_Category,
+      {
+        replacements: { cate: category, limit: 10, offset: parseInt(pageNum) },
+        type: QueryTypes.SELECT,
+      }
+    );
     if (!findRestaurantwithCategory) {
       res.status(500).json({
         log: 'no restaurant found',
       });
     } else {
-      res.status(200).json(findRestaurantwithCategory, {
-        log: 'restaurant load success',
-      });
+      res.status(200).json(findRestaurantwithCategory);
     }
   } catch (err) {
     console.error(err);
@@ -39,7 +42,7 @@ router.get('/category', async (req, res, next) => {
 });
 
 // inserting restaurant
-router.post('/', async (req, res, next) => {
+router.post('/full', async (req, res, next) => {
   try {
     const {
       id,
