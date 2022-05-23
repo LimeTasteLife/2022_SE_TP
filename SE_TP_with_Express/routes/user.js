@@ -6,7 +6,7 @@ const router = express.Router();
 // user page loading
 router.get('/', async (req, res, next) => {
   try {
-    const { user_id } = req.body.user;
+    const { user_id } = req.query;
     const findUser = await User.findOne({
       where: {
         id: user_id,

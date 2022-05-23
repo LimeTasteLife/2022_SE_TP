@@ -6,8 +6,7 @@ const router = express.Router();
 // get restaurant lists with category
 router.get('/category', async (req, res, next) => {
   try {
-    const category = req.body.category;
-    const pageNum = req.body.pageNum;
+    const { category, pageNum } = req.query;
     if (!pageNum) pageNum = 0;
     const findRestaurantwithCategory = await Restaurant.findAll({
       include: [

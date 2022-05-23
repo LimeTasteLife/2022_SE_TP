@@ -6,8 +6,7 @@ const router = express.Router();
 // get post lists with category
 router.get('/category', async (req, res, next) => {
   try {
-    const category = req.body.category;
-    const pageNum = req.body.pageNum;
+    const { category, pageNum } = req.query;
     if (!pageNum) pageNum = 0;
     const findPostwithCategory = await Post.findAll({
       include: [
@@ -42,8 +41,7 @@ router.get('/category', async (req, res, next) => {
 // get post lists with user_id
 router.get('/user', async (req, res, next) => {
   try {
-    const user_id = req.body.user_id;
-    const pageNum = req.body.pageNum;
+    const { user_id, pageNum } = req.query;
     if (!pageNum) pageNum = 0;
     const findPostwithCategory = await Post.findAll({
       include: [
