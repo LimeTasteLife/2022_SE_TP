@@ -16,7 +16,7 @@ const testInitialRouter = require('./routes/testInitial');
 dotenv.config();
 const app = express();
 app.set('port', process.env.PORT || 3000);
-if (process.env.FIRST_CONNECT === true) {
+if (process.env.FIRST_CONNECT === 'true') {
   sequelize
     .sync({ force: true })
     .then(() => {
