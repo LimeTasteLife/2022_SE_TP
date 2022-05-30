@@ -1,5 +1,5 @@
 const express = require('express');
-const { QueryTypes } = require('sequelize/types');
+const { QueryTypes } = require('sequelize');
 const { Post, Comment, sequelize } = require('../models');
 
 const router = express.Router();
@@ -30,9 +30,6 @@ router.get('/post', async (req, res, next) => {
     });
   }
 });
-
-const Query_Get_Comment_User =
-  'SELECT c.content c.created_at c.post_id FROM comment c JOIN user u ON u.id = c.user_id WHERE c.post_id = :post_id ORDER BY c.created_at ORDER BY DESC';
 
 router.get('/user', async (req, res, next) => {
   try {
