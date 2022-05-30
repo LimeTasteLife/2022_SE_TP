@@ -20,7 +20,7 @@ if (process.env.FIRST_CONNECT === true) {
   sequelize
     .sync({ force: true })
     .then(() => {
-      console.log('Success to connect DB');
+      console.log('Success to connect DB Intially');
     })
     .catch((err) => {
       console.error(err);
