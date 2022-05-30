@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+const User_post = require('./user_post');
 
 module.exports = class User extends Sequelize.Model {
   static init(sequelize) {
@@ -47,6 +48,6 @@ module.exports = class User extends Sequelize.Model {
 
   static associate(db) {
     db.User.hasMany(db.Report);
-    db.User.belongsToMany(db.Post, { through: 'user_post' });
+    db.User.belongsToMany(db.Post, { through: User_post });
   }
 };

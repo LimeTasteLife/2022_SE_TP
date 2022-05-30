@@ -10,6 +10,7 @@ const Restaurant = require('./restaurant');
 const Rest_cate = require('./rest_cate');
 const Transaction = require('./transaction');
 const User = require('./user');
+const User_post = require('./user_post');
 
 const env = process.env.NODE_ENV || 'development';
 const config = require('../config/config')[env];
@@ -34,6 +35,7 @@ db.Restaurant = Restaurant;
 db.Rest_cate = Rest_cate;
 db.Transaction = Transaction;
 db.User = User;
+db.User_post = User_post;
 
 Category.init(sequelize);
 Comment.init(sequelize);
@@ -46,6 +48,7 @@ Restaurant.init(sequelize);
 Rest_cate.init(sequelize);
 Transaction.init(sequelize);
 User.init(sequelize);
+User_post.init(sequelize);
 
 Category.associate(db);
 Comment.associate(db);
@@ -58,5 +61,6 @@ Restaurant.associate(db);
 Rest_cate.associate(db);
 Transaction.associate(db);
 User.associate(db);
+User_post.associate(db);
 
 module.exports = db;
