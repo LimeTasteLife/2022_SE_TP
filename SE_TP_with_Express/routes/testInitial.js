@@ -8,13 +8,13 @@ const router = express.Router();
 dotenv.config();
 
 router.use(async (req, res, next) => {
-  if (process.env.FIRST_CONNECT === true) {
+  if (process.env.FIRST_CONNECT === 'true') {
     console.log('Test Initializing ...');
     await insertingTestUserData();
     await insertingTestRestaurantData();
     await insertingTestPostData();
     console.log('Test Initializing finished.');
-    process.env.FIRST_CONNECT === false;
+    process.env.FIRST_CONNECT = 'false';
     next();
   } else {
     console.log('Initializing already finished.');

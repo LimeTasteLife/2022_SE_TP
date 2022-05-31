@@ -24,7 +24,7 @@ module.exports = class User extends Sequelize.Model {
           unique: true,
         },
         point: {
-          type: Sequelize.INTEGER.UNSIGNED,
+          type: Sequelize.INTEGER,
           allowNull: true,
           defaultValue: '0',
         },
@@ -48,6 +48,7 @@ module.exports = class User extends Sequelize.Model {
 
   static associate(db) {
     db.User.hasMany(db.Report);
+    db.User.hasMany(db.Transaction);
     db.User.belongsToMany(db.Post, { through: User_post });
   }
 };

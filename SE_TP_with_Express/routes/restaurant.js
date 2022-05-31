@@ -55,6 +55,7 @@ router.get('/category', async (req, res, next) => {
 router.post('/full', async (req, res, next) => {
   try {
     const { info, menu } = req.body.restaurant;
+    console.log(info);
     const {
       id,
       name,
@@ -66,7 +67,7 @@ router.post('/full', async (req, res, next) => {
       adjusted_delivery_fee,
       phone,
       address,
-      url,
+      logo_url,
       categories,
       lat,
       lng,
@@ -83,7 +84,7 @@ router.post('/full', async (req, res, next) => {
       delivery_time: estimated_delivery_time,
       phone: phone,
       address: address,
-      url: url,
+      url: logo_url,
       lat: lat,
       lng: lng,
     });
@@ -107,7 +108,7 @@ router.post('/full', async (req, res, next) => {
 });
 
 // updating restaurants
-router.patch('/', async (req, res, next) => {
+router.put('/', async (req, res, next) => {
   try {
     const {
       id,
@@ -164,7 +165,7 @@ router.delete('/', async (req, res, next) => {
         log: 'no restaurant found',
       });
     } else {
-      const destroyMenu = await Menu.destory(
+      const destroyMenu = await Menu.destroy(
         {
           where: { restaurant_id: restaurant_id },
         },

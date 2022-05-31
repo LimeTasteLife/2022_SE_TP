@@ -1,5 +1,6 @@
 const express = require('express');
 const { Transaction, sequelize, User } = require('../models');
+const { QueryTypes } = require('sequelize');
 
 const router = express.Router();
 const limit = 10;
@@ -36,7 +37,7 @@ router.get('/', async (req, res, next) => {
 });
 
 const Query_Get_User_Transaction =
-  'SELECT t.amount t.content FROM User u JOIN transaction t ON u.id = t.user_id WHERE u.id = :user_id ORDER BY t.created_at DESC LIMIT :limit OFFSET :offset';
+  'SELECT t.amount, t.content, t.created_at FROM transaction t WHERE user_id = :user_id ORDER BY created_at DESC LIMIT :limit OFFSET :offset';
 router.get('/transaction', async (req, res, next) => {
   try {
     const { user_id, pageNum } = req.query;
@@ -85,7 +86,7 @@ router.patch('/dpst', async (req, res, next) => {
     } else {
       await findUser.update({ point: findUser.point + parseInt(point) }, { t });
       await findUser.save({ t });
-      const makeTransaction = Transaction.create(
+      const makeTransaction = await Transaction.create(
         {
           user_id: user_id,
           amount: parseInt(point),
@@ -135,7 +136,7 @@ router.patch('/wtdr', async (req, res, next) => {
           { t }
         );
         await findUser.save({ t });
-        const makeTransaction = Transaction.create(
+        const makeTransaction = await Transaction.create(
           {
             user_id: user_id,
             amount: parseInt(point) * -1,
