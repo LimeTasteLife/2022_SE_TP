@@ -6,13 +6,15 @@ const router = express.Router();
 // making post
 router.post('/', async (req, res, next) => {
   try {
-    const { user_id, title, content, email, target_id } = req.body.report;
+    const { user_id, title, content, email, target_id, target_user_name } =
+      req.body.report;
     const createReport = await Report.create({
       user_id: user_id,
       title: title,
       content: content,
       email: email,
       target_id: target_id,
+      target_user_name: target_user_name,
     });
     if (!createReport) {
       res.status(500).json({

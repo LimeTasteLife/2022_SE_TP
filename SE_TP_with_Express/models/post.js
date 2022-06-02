@@ -28,13 +28,18 @@ module.exports = class Post extends Sequelize.Model {
         cur_mem: {
           type: Sequelize.INTEGER.UNSIGNED,
           allowNull: false,
-          defaultValue: 0,
+          defaultValue: 1,
+        },
+        is_complete: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
         },
         lat: {
           type: Sequelize.FLOAT,
           allowNull: false,
         },
-        long: {
+        lng: {
           type: Sequelize.FLOAT,
           allowNull: false,
         },
@@ -55,6 +60,7 @@ module.exports = class Post extends Sequelize.Model {
   static associate(db) {
     db.Post.hasOne(db.Post_content, { foreignKey: 'post_id', sourceKey: 'id' });
     db.Post.hasMany(db.Comment);
+    db.Post.hasMany(db.Party);
     db.Post.belongsToMany(db.User, { through: User_post });
     db.Post.belongsToMany(db.Category, { through: Post_cate });
   }

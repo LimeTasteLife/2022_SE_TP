@@ -17,13 +17,13 @@ const Query_Get_Restaurant_Category =
 // get restaurant lists with category
 router.get('/category', async (req, res, next) => {
   try {
-    const { category_id, pageNum } = req.query;
+    const { category_id, page_num } = req.query;
     if (!category_id) {
       res.status(400).json({
         log: 'wrong input',
       });
     }
-    if (!pageNum) pageNum = 0;
+    if (!page_num) page_num = 0;
 
     const findRestaurantwithCategory = await sequelize.query(
       Query_Get_Restaurant_Category,
@@ -31,7 +31,7 @@ router.get('/category', async (req, res, next) => {
         replacements: {
           category_id: parseInt(category_id),
           limit: limit,
-          offset: parseInt(pageNum) * limit,
+          offset: parseInt(page_num) * limit,
         },
         type: QueryTypes.SELECT,
       }
@@ -47,6 +47,46 @@ router.get('/category', async (req, res, next) => {
     console.error(err);
     res.status(500).json({
       log: 'restaurant load failure',
+    });
+  }
+});
+
+const Query_Get_Restaurant_Info =
+  'SELECT r.name, r.review_avg, r.begin, r.end, r.min_order_amount, r.delivery_fee, r.delivery_time, r.phone, r.address, r.url, r.lat, r.lng FROM restaurant r WHERE r.id = :restaurant_id ORDER BY r.created_at DESC';
+
+router.get('/info', async (req, res, next) => {
+  try {
+    const { restaurant_id } = req.query;
+    if (!restaurant_id) {
+      res.status(400).json({
+        log: 'wrong input',
+      });
+    }
+    const findRestaurantwithMenu = await sequelize.query(
+      Query_Get_Restaurant_Info,
+      {
+        replacements: {
+          restaurant_id: parseInt(restaurant_id),
+        },
+        type: QueryTypes.SELECT,
+      }
+    );
+    if (!findRestaurantwithMenu) {
+      res.status(500).json({
+        log: 'no restaurant found',
+      });
+    } else {
+      const findMenus = await Menu.findAll({
+        attributes: ['name', 'price', 'url', 'restaurant_id'],
+        where: { restaurant_id: restaurant_id },
+      });
+      findRestaurantwithMenu.push(findMenus);
+      res.status(200).json(findRestaurantwithMenu);
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      log: 'restaurant data load failure',
     });
   }
 });

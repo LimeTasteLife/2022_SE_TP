@@ -7,6 +7,7 @@ const { sequelize } = require('./models');
 const indexRouter = require('./routes');
 const categoryRouter = require('./routes/category');
 const commentRouter = require('./routes/comment');
+const partyRouter = require('./routes/party');
 const postRouter = require('./routes/post');
 const reportRouter = require('./routes/report');
 const restaurantRouter = require('./routes/restaurant');
@@ -27,7 +28,7 @@ if (process.env.FIRST_CONNECT === 'true') {
     });
 } else {
   sequelize
-    .sync({ alter: true })
+    .sync({})
     .then(() => {
       console.log('Success to connect DB');
     })
@@ -47,6 +48,7 @@ app.use('/testInitial', testInitialRouter);
 
 app.use('/category', categoryRouter);
 app.use('/comment', commentRouter);
+app.use('/party', partyRouter);
 app.use('/post', postRouter);
 app.use('/report', reportRouter);
 app.use('/restaurant', restaurantRouter);

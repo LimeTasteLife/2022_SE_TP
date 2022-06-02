@@ -40,13 +40,13 @@ const Query_Get_User_Transaction =
   'SELECT t.amount, t.content, t.created_at FROM transaction t WHERE user_id = :user_id ORDER BY created_at DESC LIMIT :limit OFFSET :offset';
 router.get('/transaction', async (req, res, next) => {
   try {
-    const { user_id, pageNum } = req.query;
-    if (!pageNum) pageNum = 0;
+    const { user_id, page_num } = req.query;
+    if (!page_num) page_num = 0;
     const findUser = await sequelize.query(Query_Get_User_Transaction, {
       replacements: {
         user_id: user_id,
         limit: limit,
-        offset: parseInt(pageNum) * limit,
+        offset: parseInt(page_num) * limit,
       },
       type: QueryTypes.SELECT,
     });

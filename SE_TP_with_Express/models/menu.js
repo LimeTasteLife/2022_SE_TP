@@ -31,6 +31,9 @@ module.exports = class Menu extends Sequelize.Model {
   }
 
   static associate(db) {
-    db.Menu.belongsTo(db.Restaurant);
+    db.Menu.belongsTo(db.Restaurant, {
+      foreignKey: 'restaurant_id',
+      targetKey: 'id',
+    });
   }
 };

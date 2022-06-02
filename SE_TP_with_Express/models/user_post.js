@@ -3,7 +3,15 @@ const Sequelize = require('sequelize');
 module.exports = class User_post extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
-      {},
+      {
+        /*
+        chk: {
+          type: Sequelize.BOOLEAN,
+          allowNull: false,
+          defaultValue: false,
+        },
+        */
+      },
       {
         sequelize,
         timestamps: false,

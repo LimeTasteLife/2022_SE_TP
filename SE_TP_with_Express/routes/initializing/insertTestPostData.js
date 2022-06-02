@@ -22,7 +22,7 @@ module.exports = async function insertingTestPostData() {
     );
     await new Promise((resolve, reject) => setTimeout(resolve, 5000));
 
-    await justConnecting();
+    //await justConnecting();
     await justConnecting2();
     return;
   } catch (err) {
@@ -41,13 +41,13 @@ async function creatingPostData(post) {
       rest_id,
       user_id,
       lat,
-      long,
+      lng,
     } = post;
     const createPostData = await Post.create({
       title: title,
       restaurant_id: parseInt(rest_id),
       lat: parseFloat(lat),
-      long: parseFloat(long),
+      lng: parseFloat(lng),
       mem_count: parseInt(mem_count),
     });
 
@@ -74,37 +74,37 @@ async function justConnecting() {
       },
     });
     await p1.addUser(2);
-    await p1.addUser(3);
+    //await p1.addUser(3);
     const p2 = await Post.findOne({
       where: {
         id: 2,
       },
     });
     await p2.addUser(1);
-    await p2.addUser(3);
-    await p2.addUser(4);
+    // await p2.addUser(3);
+    // await p2.addUser(4);
     const p3 = await Post.findOne({
       where: {
         id: 3,
       },
     });
     await p3.addUser(1);
-    await p3.addUser(2);
-    await p3.addUser(4);
+    // await p3.addUser(2);
+    // await p3.addUser(4);
     const p4 = await Post.findOne({
       where: {
         id: 4,
       },
     });
     await p4.addUser(1);
-    await p4.addUser(2);
+    // await p4.addUser(2);
     const p6 = await Post.findOne({
       where: {
         id: 6,
       },
     });
     await p6.addUser(2);
-    await p6.addUser(3);
+    // await p6.addUser(3);
     //console.log(p1, p2, p3, p4, p6);
     console.log('finished');
     return;

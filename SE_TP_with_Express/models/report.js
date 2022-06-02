@@ -22,6 +22,10 @@ module.exports = class Report extends Sequelize.Model {
           type: Sequelize.INTEGER.UNSIGNED,
           allowNull: false,
         },
+        target_user_name: {
+          type: Sequelize.STRING(20), // 20byte 제한.
+          allowNull: true,
+        },
         user_id: {
           type: Sequelize.INTEGER.UNSIGNED,
           allowNull: false,
