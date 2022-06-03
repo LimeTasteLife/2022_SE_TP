@@ -55,8 +55,8 @@ router.get('/category', async (req, res, next) => {
             type: QueryTypes.SELECT,
           }
         );
-        console.log(findCategories);
-        console.log(findRestaurantwithCategory[i]);
+        //console.log(findCategories);
+        //console.log(findRestaurantwithCategory[i]);
         findRestaurantwithCategory[i].categories = findCategories;
         i++;
       }

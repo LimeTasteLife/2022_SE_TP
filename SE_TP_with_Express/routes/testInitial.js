@@ -14,12 +14,20 @@ router.use(async (req, res, next) => {
     await insertingTestRestaurantData();
     await insertingTestPostData();
     console.log('Test Initializing finished.');
+    req.message = 'Test Initializing finished.';
     process.env.FIRST_CONNECT = 'false';
     next();
   } else {
     console.log('Initializing already finished.');
+    req.message = 'Initializing already finished.';
     next();
   }
+});
+
+router.get('/', (req, res, next) => {
+  res.status(200).json({
+    log: req.message,
+  });
 });
 
 module.exports = router;

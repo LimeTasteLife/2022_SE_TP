@@ -70,6 +70,41 @@ router.get('/category', async (req, res, next) => {
   }
 });
 
+router.get('/info', async (req, res, next) => {
+  try {
+    const { post_id } = req.query;
+    if (!post_id) {
+      res.status(400).json({
+        log: 'wrong input',
+      });
+    }
+    const findPost = await Post.findOne({
+      where: { id: post_id },
+    });
+    const findPost_content = await Post_content.findOne({
+      where: { post_id: post_id },
+    });
+    const findRestaurant = await Restaurant.findOne({
+      attributes: ['name', 'min_order_amount', 'delivery_fee', 'lat', 'lng'],
+      where: { id: findPost.restaurant_id },
+    });
+    findPost.dataValues.content = findPost_content;
+    findPost.dataValues.restaurant = findRestaurant;
+    if (!findPost || !findPost_content || !findRestaurant) {
+      res.status(400).json({
+        log: 'no data found',
+      });
+    } else {
+      res.status(200).json(findPost);
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      log: 'post info load failure',
+    });
+  }
+});
+
 // get post lists with user_id
 router.get('/user', async (req, res, next) => {
   try {

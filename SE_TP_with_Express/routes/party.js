@@ -42,14 +42,12 @@ router.get('/post', async (req, res, next) => {
     }
 
     for await (item of findParty) {
-      if (item.is_checked === false) {
-        const findUser = await User.findOne({
-          attributes: ['name'],
-          where: { id: item.user_id },
-        });
-        item.dataValues.name = findUser.name;
-        result.push(item);
-      }
+      const findUser = await User.findOne({
+        attributes: ['name'],
+        where: { id: item.user_id },
+      });
+      item.dataValues.name = findUser.name;
+      result.push(item);
     }
 
     res.status(200).json(result);

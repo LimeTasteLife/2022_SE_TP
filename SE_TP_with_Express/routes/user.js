@@ -3,7 +3,7 @@ const { Transaction, sequelize, User } = require('../models');
 const { QueryTypes } = require('sequelize');
 
 const router = express.Router();
-const limit = 10;
+const limit = 100;
 // user page loading
 router.get('/', async (req, res, next) => {
   try {
