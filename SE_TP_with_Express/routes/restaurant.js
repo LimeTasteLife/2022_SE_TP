@@ -13,6 +13,8 @@ const router = express.Router();
 const limit = 10;
 const Query_Get_Restaurant_Category =
   'SELECT r.id, r.name, r.review_avg, r.begin, r.end, r.min_order_amount, r.delivery_fee, r.delivery_time, r.phone, r.address, r.url, r.lat, r.lng FROM restaurant r JOIN rest_cate rc ON r.id = rc.restaurant_id JOIN category c ON c.id = rc.category_id WHERE c.id = :category_id ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset';
+const Query_Get_Category_Restaurant =
+  'SELECT c.id, c.name FROM category c JOIN rest_cate rc ON c.id = rc.category_id JOIN restaurant r ON r.id = rc.restaurant_id WHERE r.id = :restaurant_id ORDER BY c.id ASC';
 
 // get restaurant lists with category
 router.get('/category', async (req, res, next) => {
@@ -41,6 +43,23 @@ router.get('/category', async (req, res, next) => {
         log: 'no restaurant found',
       });
     } else {
+      let i = 0;
+      for await (item of findRestaurantwithCategory) {
+        let temp = [];
+        const findCategories = await sequelize.query(
+          Query_Get_Category_Restaurant,
+          {
+            replacements: {
+              restaurant_id: item.id,
+            },
+            type: QueryTypes.SELECT,
+          }
+        );
+        console.log(findCategories);
+        console.log(findRestaurantwithCategory[i]);
+        findRestaurantwithCategory[i].categories = findCategories;
+        i++;
+      }
       res.status(200).json(findRestaurantwithCategory);
     }
   } catch (err) {

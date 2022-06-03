@@ -17,7 +17,7 @@ const router = express.Router();
 
 const limit = 10;
 const Query_Get_Post_Category =
-  'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.lat, p.lng FROM post p JOIN post_cate pc ON p.id = pc.post_id JOIN category c ON c.id = pc.category_id WHERE c.id = :category_id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
+  'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.cur_mem, p.is_complete, p.lat, p.lng FROM post p JOIN post_cate pc ON p.id = pc.post_id JOIN category c ON c.id = pc.category_id WHERE c.id = :category_id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
 const Query_Get_Post_User =
   'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.lat, p.lng FROM post p JOIN user_post up ON p.id = up.post_id JOIN user u ON u.id = up.user_id JOIN restaurant r ON r.id = p.restaurant_id WHERE u.id = :user_id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
 
@@ -45,11 +45,12 @@ router.get('/category', async (req, res, next) => {
     let i = 0;
     for await (let item of findPostwithCategory) {
       const findRestaurantUrl = await Restaurant.findOne({
-        attributes: ['url'],
+        attributes: ['url', 'name'],
         where: { id: item.restaurant_id },
       });
-      const { url } = findRestaurantUrl.dataValues;
+      const { url, name } = findRestaurantUrl.dataValues;
       findPostwithCategory[i].url = url;
+      findPostwithCategory[i].restaurant_name = name;
       i++;
     }
 

@@ -11,7 +11,7 @@ router.use(async (req, res, next) => {
   if (process.env.FIRST_CONNECT === 'true') {
     console.log('Test Initializing ...');
     await insertingTestUserData();
-    //await insertingTestRestaurantData();
+    await insertingTestRestaurantData();
     await insertingTestPostData();
     console.log('Test Initializing finished.');
     process.env.FIRST_CONNECT = 'false';
