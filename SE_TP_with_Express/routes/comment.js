@@ -1,6 +1,6 @@
 const express = require('express');
 const { QueryTypes } = require('sequelize');
-const { Post, Comment, sequelize } = require('../models');
+const { Post, Comment, sequelize, User } = require('../models');
 
 const router = express.Router();
 
@@ -31,15 +31,20 @@ router.get('/post', async (req, res, next) => {
   }
 });
 
-const Query_Get_Comment_User =
-  'SELECT c.content, c.created_at, c.post_id FROM comment c JOIN user u ON u.id = c.user_id WHERE c.post_id = :post_id ORDER BY c.created_at DESC';
-
 router.get('/user', async (req, res, next) => {
   try {
     const { user_id } = req.query;
+    const findUser = await User.findOne({
+      where: { id: user_id },
+    });
+    if (!findUser) {
+      res.status(400).json({
+        log: 'no user found',
+      });
+    }
     const findCommentwithUser = await Comment.findAll({
       where: { user_id: user_id },
-      attributes: ['content', 'created_at', 'post_id'],
+      attributes: ['content', 'created_at', 'post_id', 'user_id'],
       order: [['created_at', 'DESC']],
     });
     if (!findCommentwithUser) {
@@ -61,14 +66,23 @@ router.post('/', async (req, res, next) => {
   try {
     const { post_id, content, user_id } = req.body;
     const findPost = await Post.findOne({
-      id: post_id,
+      where: { id: post_id },
+    });
+    console.log(findPost);
+    const findUser = await User.findOne({
+      where: { id: user_id },
     });
     if (!findPost) {
       res.status(400).json({
         log: 'no post found',
       });
+    } else if (!findUser) {
+      res.status(400).json({
+        log: 'no user found',
+      });
     } else {
       const createComment = await Comment.create({
+        post_id: post_id,
         content: content,
         user_id: user_id,
       });

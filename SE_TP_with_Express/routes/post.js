@@ -10,6 +10,7 @@ const {
   Comment,
   User,
   Transaction,
+  Category,
 } = require('../models');
 const { QueryTypes } = require('sequelize');
 
@@ -19,7 +20,9 @@ const limit = 10;
 const Query_Get_Post_Category =
   'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.cur_mem, p.is_complete, p.lat, p.lng FROM post p JOIN post_cate pc ON p.id = pc.post_id JOIN category c ON c.id = pc.category_id WHERE c.id = :category_id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
 const Query_Get_Post_User =
-  'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.lat, p.lng FROM post p JOIN user_post up ON p.id = up.post_id JOIN user u ON u.id = up.user_id JOIN restaurant r ON r.id = p.restaurant_id WHERE u.id = :user_id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
+  'SELECT p.id, p.restaurant_id, p.title, p.mem_count, p.cur_mem, p.is_complete, p.lat, p.lng FROM post p JOIN user_post up ON p.id = up.post_id JOIN user u ON u.id = up.user_id JOIN restaurant r ON r.id = p.restaurant_id WHERE u.id = :user_id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset';
+const Query_Get_Category_Restaurant =
+  'SELECT c.id, c.name FROM category c JOIN rest_cate rc ON c.id = rc.category_id JOIN restaurant r ON r.id = rc.restaurant_id WHERE r.id = :restaurant_id ORDER BY c.id ASC';
 
 // get post lists with category
 router.get('/category', async (req, res, next) => {
@@ -121,11 +124,12 @@ router.get('/user', async (req, res, next) => {
     let i = 0;
     for await (let item of findPostwithUser) {
       const findRestaurantUrl = await Restaurant.findOne({
-        attributes: ['url'],
+        attributes: ['url', 'name'],
         where: { id: item.restaurant_id },
       });
-      const { url } = findRestaurantUrl.dataValues;
+      const { url, name } = findRestaurantUrl.dataValues;
       findPostwithUser[i].url = url;
+      findPostwithUser[i].restaurant_name = name;
       i++;
     }
     if (!findPostwithUser) {
@@ -153,7 +157,6 @@ router.post('/', async (req, res, next) => {
       mem_count,
       rest_id,
       user_id,
-      category_id,
       lat,
       lng,
     } = req.body.post;
@@ -179,8 +182,20 @@ router.post('/', async (req, res, next) => {
         log: 'making post failure',
       });
     } else {
-      await createPostData.addCategory(parseInt(category_id));
+      const findCategories = await sequelize.query(
+        Query_Get_Category_Restaurant,
+        {
+          replacements: {
+            restaurant_id: rest_id,
+          },
+          type: QueryTypes.SELECT,
+        }
+      );
+      for await (item of findCategories) {
+        await createPostData.addCategory(item.id);
+      }
       await createPostData.addUser(parseInt(user_id));
+
       res.status(200).json({
         log: 'post insert success',
       });
