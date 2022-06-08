@@ -23,6 +23,7 @@ router.get('/', async (req, res, next) => {
           {
             name: findUser.name,
             point: findUser.point,
+            email: findUser.email,
           },
         ],
         log: 'user page load success',

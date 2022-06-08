@@ -5,7 +5,7 @@ const { Post, Comment, sequelize, User } = require('../models');
 const router = express.Router();
 
 const Query_Get_Comment_Post =
-  'SELECT c.content, c.created_at, u.name FROM comment c JOIN user u ON u.id = c.user_id WHERE c.post_id = :post_id ORDER BY c.created_at DESC';
+  'SELECT c.content, c.created_at, u.name, u.id FROM comment c JOIN user u ON u.id = c.user_id WHERE c.post_id = :post_id ORDER BY c.created_at DESC';
 
 router.get('/post', async (req, res, next) => {
   try {
