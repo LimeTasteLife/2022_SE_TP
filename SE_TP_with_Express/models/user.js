@@ -32,6 +32,11 @@ module.exports = class User extends Sequelize.Model {
           type: Sequelize.STRING(1000),
           allowNull: true,
         },
+        manner: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+          defaultValue: '0',
+        },
       },
       {
         sequelize,

@@ -83,6 +83,9 @@ router.post('/accept', async (req, res, next) => {
     const findUser = await User.findOne({
       where: { id: findParty.user_id },
     });
+    if (findUser.point < findParty.transaction_point) {
+      throw new Error('low point');
+    }
     await User.update(
       { point: findUser.point - findParty.transaction_point },
       { where: { id: findParty.user_id } },
@@ -111,7 +114,7 @@ router.post('/accept', async (req, res, next) => {
       throw new Error('party already fulled');
     }
     await Post.update(
-      { cur_mem: findPost.cur_mem + 1 },
+      { cur_mem: find.cur_mem + 1 },
       { where: { id: findParty.post_id } },
       { t }
     );
@@ -166,6 +169,17 @@ router.post('/complete', async (req, res, next) => {
     for await (item of findParty) {
       if (item.is_checked === true) {
         amount = amount + item.transaction_point;
+        let findUseri = await User.findOne(
+          {
+            where: { id: item.user_id },
+          },
+          { t }
+        );
+        await User.update(
+          { manner: findUseri.manner + 1 },
+          { where: { id: item.user_id } },
+          { t }
+        );
       }
     }
     const createTransaction = await Transaction.create(
@@ -180,6 +194,14 @@ router.post('/complete', async (req, res, next) => {
       {
         where: { id: findPost_content.user_id },
       },
+      { t }
+    );
+    await User.update(
+      {
+        point: findUser.point + amount,
+        manner: findUser.manner + 1,
+      },
+      { where: { id: findPost_content.user_id } },
       { t }
     );
     await findUser.addTransaction(createTransaction, { t });
