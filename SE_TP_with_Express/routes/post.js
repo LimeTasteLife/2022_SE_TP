@@ -29,7 +29,7 @@ router.get('/category', async (req, res, next) => {
   try {
     const { category_id, page_num } = req.query;
     if (!category_id) {
-      res.status(400).json({
+      res.status(412).json({
         log: 'wrong input',
       });
     }
@@ -59,7 +59,7 @@ router.get('/category', async (req, res, next) => {
 
     // console.log(findRestaurantUrl);
     if (!findPostwithCategory) {
-      res.status(500).json({
+      res.status(400).json({
         log: 'no post found',
       });
     } else {
@@ -77,7 +77,7 @@ router.get('/info', async (req, res, next) => {
   try {
     const { post_id } = req.query;
     if (!post_id) {
-      res.status(400).json({
+      res.status(412).json({
         log: 'wrong input',
       });
     }
@@ -133,7 +133,7 @@ router.get('/user', async (req, res, next) => {
       i++;
     }
     if (!findPostwithUser) {
-      res.status(500).json({
+      res.status(400).json({
         log: 'no post found',
       });
     } else {
@@ -178,7 +178,7 @@ router.post('/', async (req, res, next) => {
       }
     );
     if (!createPostData) {
-      res.status(400).json({
+      res.status(411).json({
         log: 'making post failure',
       });
     } else {
@@ -210,6 +210,7 @@ router.post('/', async (req, res, next) => {
 
 // updating post
 router.put('/', async (req, res, next) => {
+  const t = await sequelize.transaction();
   try {
     const {
       id,
@@ -230,7 +231,8 @@ router.put('/', async (req, res, next) => {
         lng: parseFloat(lng),
         mem_count: parseInt(mem_count),
       },
-      { where: { id: id } }
+      { where: { id: id } },
+      { t }
     );
     const updatePostContentData = await Post_content.update(
       {
@@ -240,7 +242,8 @@ router.put('/', async (req, res, next) => {
       },
       {
         where: { post_id: id },
-      }
+      },
+      { t }
     );
     res.status(200).json({
       log: 'post update success',
@@ -261,10 +264,12 @@ router.delete('/', async (req, res, next) => {
       where: { id: post_id },
     });
     if (!findPost) {
-      res.status(400).json({
-        log: 'no post found',
-      });
-    } else {
+      const error = new Error('No post found');
+      error.status = 400;
+      throw error;
+    } else if (findPost.is) {
+    }
+    {
       const destroyPost_cate = await Post_cate.destroy(
         {
           where: { post_id: post_id },
@@ -340,7 +345,7 @@ router.delete('/', async (req, res, next) => {
   } catch (err) {
     await t.rollback();
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: 'post delete failure',
     });
   }

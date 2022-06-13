@@ -28,7 +28,7 @@ if (process.env.FIRST_CONNECT === 'true') {
     });
 } else {
   sequelize
-    .sync({ alter: true })
+    .sync({})
     .then(() => {
       console.log('Success to connect DB');
     })

@@ -15,16 +15,22 @@ router.get('/post', async (req, res, next) => {
     const result = [];
     const { post_id } = req.query;
     if (!post_id) {
-      throw new Error('wrong input');
+      const error = new Error('wrong input');
+      error.status(412);
+      throw error;
     }
     const findPost = await Post.findOne({
       where: { id: post_id },
     });
     if (findPost.cur_mem === findPost.mem_count) {
-      throw new Error('party already full');
+      const error = new Error('party already full');
+      error.status(421);
+      throw error;
     }
     if (findPost.is_complete === true) {
-      throw new Error('post(party) already complete');
+      const error = new Error('post(party) already complete');
+      error.status(422);
+      throw error;
     }
     const findParty = await Party.findAll({
       attributes: [
@@ -38,7 +44,9 @@ router.get('/post', async (req, res, next) => {
     });
 
     if (!findParty) {
-      throw new Error('no party found');
+      const error = new Error('no party found');
+      error.status(400);
+      throw error;
     }
 
     for await (item of findParty) {
@@ -53,7 +61,7 @@ router.get('/post', async (req, res, next) => {
     res.status(200).json(result);
   } catch (err) {
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: err.message,
     });
   }
@@ -64,16 +72,22 @@ router.post('/accept', async (req, res, next) => {
   try {
     const { party_id } = req.body;
     if (!party_id) {
-      throw new Error('wrong input');
+      const error = new Error('wrong input');
+      error.status(412);
+      throw error;
     }
     const findParty = await Party.findOne({
       where: { id: party_id },
     });
     if (!findParty) {
-      throw new Error('no party found');
+      const error = new Error('no party found');
+      error.status(400);
+      throw error;
     }
     if (findParty.is_checked === true) {
-      throw new Error('already joined');
+      const error = new Error('already joined');
+      error.status(425);
+      throw error;
     }
     await Party.update(
       { is_checked: true },
@@ -84,7 +98,9 @@ router.post('/accept', async (req, res, next) => {
       where: { id: findParty.user_id },
     });
     if (findUser.point < findParty.transaction_point) {
-      throw new Error('low point');
+      const error = new Error('low point');
+      error.status(430);
+      throw error;
     }
     await User.update(
       { point: findUser.point - findParty.transaction_point },
@@ -96,10 +112,14 @@ router.post('/accept', async (req, res, next) => {
       where: { id: findParty.post_id },
     });
     if (findPost.is_complete === true) {
-      throw new Error('Post(party) already complete');
+      const error = new Error('Post(party) already complete');
+      error.status(422);
+      throw error;
     }
     if (findPost.cur_mem >= findPost.mem_count) {
-      throw new Error('Post(party) already full');
+      const error = new Error('Post(party) already full');
+      error.status(421);
+      throw error;
     }
     const createTransaction = await Transaction.create(
       {
@@ -110,14 +130,20 @@ router.post('/accept', async (req, res, next) => {
       { t }
     );
     await findUser.addTransaction(createTransaction, { t });
-    if (findPost.cur_mem >= findPost.mem_count) {
-      throw new Error('party already fulled');
-    }
     await Post.update(
-      { cur_mem: find.cur_mem + 1 },
+      { cur_mem: findPost.cur_mem + 1 },
       { where: { id: findParty.post_id } },
       { t }
     );
+    if (findPost.cur_mem === findPost.mem_count) {
+      await Post.update(
+        {
+          is_complete: true,
+        },
+        { where: { id: findParty.post_id } },
+        { t }
+      );
+    }
     await t.commit();
     res.status(200).json({
       log: 'part accept success',
@@ -125,7 +151,7 @@ router.post('/accept', async (req, res, next) => {
   } catch (err) {
     await t.rollback();
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: err.message,
     });
   }
@@ -136,7 +162,9 @@ router.post('/complete', async (req, res, next) => {
   try {
     const { post_id } = req.body;
     if (!post_id) {
-      throw new Error('wrong input');
+      const error = new Error('wrong input');
+      error.status(412);
+      throw error;
     }
     const findPost = await Post.findOne(
       {
@@ -145,7 +173,9 @@ router.post('/complete', async (req, res, next) => {
       { t }
     );
     if (findPost.is_complete === true) {
-      throw new Error('Post(Party) already complete');
+      const error = new Error('Post(Party) already complete');
+      error.status(422);
+      throw error;
     }
     await Post.update(
       {
@@ -212,7 +242,7 @@ router.post('/complete', async (req, res, next) => {
   } catch (err) {
     await t.rollback();
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: err.message,
     });
   }
@@ -231,7 +261,7 @@ router.delete('/reject', async (req, res, next) => {
       });
     } else {
       if (findParty.is_checked === true) {
-        res.status(400).json({
+        res.status(425).json({
           log: 'failure party already checked',
         });
       } else {
@@ -261,29 +291,41 @@ router.post('/join', async (req, res, next) => {
   try {
     const { user_id, post_id, transaction_point, content } = req.body;
     if (!user_id || !post_id || !content) {
-      throw new Error('wrong input');
+      const error = new Error('wrong input');
+      error.status(412);
+      throw error;
     }
 
     const findUser = await User.findOne({
       where: { id: user_id },
     });
     if (!findUser) {
-      throw new Error('no user found');
+      const error = new Error('no user found');
+      error.status(400);
+      throw error;
     }
     if (transaction_point > findUser.point) {
-      throw new Error('no point');
+      const error = new Error('no point');
+      error.status(430);
+      throw error;
     }
     const findPost = await Post.findOne({
       where: { id: post_id },
     });
     if (!findPost) {
-      throw new Error('no post found');
+      const error = new Error('no post found');
+      error.status(400);
+      throw error;
     }
     if (findPost.cur_mem === findPost.mem_count) {
-      throw new Error('party already full');
+      const error = new Error('party already full');
+      error.status(421);
+      throw error;
     }
     if (findPost.is_complete === true) {
-      throw new Error('party already closed');
+      const error = new Error('party already closed');
+      error.status(422);
+      throw error;
     }
 
     const createParty = await Party.create(
@@ -304,7 +346,7 @@ router.post('/join', async (req, res, next) => {
   } catch (err) {
     await t.rollback();
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: err.message,
     });
   }

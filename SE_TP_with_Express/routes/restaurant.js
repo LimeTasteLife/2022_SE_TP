@@ -21,7 +21,7 @@ router.get('/category', async (req, res, next) => {
   try {
     const { category_id, page_num } = req.query;
     if (!category_id) {
-      res.status(400).json({
+      res.status(412).json({
         log: 'wrong input',
       });
     }
@@ -39,7 +39,7 @@ router.get('/category', async (req, res, next) => {
       }
     );
     if (!findRestaurantwithCategory) {
-      res.status(500).json({
+      res.status(400).json({
         log: 'no restaurant found',
       });
     } else {
@@ -77,7 +77,7 @@ router.get('/info', async (req, res, next) => {
   try {
     const { restaurant_id } = req.query;
     if (!restaurant_id) {
-      res.status(400).json({
+      res.status(412).json({
         log: 'wrong input',
       });
     }
@@ -91,7 +91,7 @@ router.get('/info', async (req, res, next) => {
       }
     );
     if (!findRestaurantwithMenu) {
-      res.status(500).json({
+      res.status(400).json({
         log: 'no restaurant found',
       });
     } else {
@@ -148,7 +148,7 @@ router.post('/full', async (req, res, next) => {
       lng: lng,
     });
     if (!createRestaurantData) {
-      res.status(400).json({
+      res.status(411).json({
         log: 'restaurant insert failure',
       });
     } else {

@@ -10,7 +10,9 @@ router.post('/', async (req, res, next) => {
     const { user_id, title, content, email, target_id, target_user_name } =
       req.body.report;
     if (user_id === 0) {
-      throw new Error('No user found');
+      const error = new Error('No user found');
+      error.status = 400;
+      throw error;
     }
     const createReport = await Report.create(
       {
@@ -27,7 +29,9 @@ router.post('/', async (req, res, next) => {
       where: { id: target_id },
     });
     if (!findUser) {
-      throw new Error('No user found');
+      const error = new Error('No user found');
+      error.status = 400;
+      throw error;
     }
     await User.update(
       {
@@ -37,7 +41,9 @@ router.post('/', async (req, res, next) => {
       { t }
     );
     if (!createReport) {
-      throw new Error('Making report failure');
+      const error = new Error('Making report failure');
+      error.status = 411;
+      throw error;
     } else {
       res.status(200).json({
         log: 'report success',
@@ -46,7 +52,7 @@ router.post('/', async (req, res, next) => {
   } catch (err) {
     await t.rollback();
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: err.message,
     });
   }

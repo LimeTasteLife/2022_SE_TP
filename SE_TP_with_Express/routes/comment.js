@@ -17,7 +17,7 @@ router.get('/post', async (req, res, next) => {
       type: QueryTypes.SELECT,
     });
     if (!findCommentwithPost) {
-      res.status(500).json({
+      res.status(400).json({
         log: 'no comment found',
       });
     } else {
@@ -48,7 +48,7 @@ router.get('/user', async (req, res, next) => {
       order: [['created_at', 'DESC']],
     });
     if (!findCommentwithUser) {
-      res.status(500).json({
+      res.status(400).json({
         log: 'no comment found',
       });
     } else {
@@ -88,7 +88,7 @@ router.post('/', async (req, res, next) => {
       });
       findPost.addComment(createComment);
       if (!createComment) {
-        res.status(400).json({
+        res.status(411).json({
           log: 'creating comment failure',
         });
       } else {

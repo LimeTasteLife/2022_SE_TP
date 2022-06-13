@@ -61,7 +61,7 @@ router.get('/transaction', async (req, res, next) => {
     }
   } catch (err) {
     console.error(err);
-    res.status(400).json({
+    res.status(500).json({
       log: 'user transaction load failure',
     });
   }
@@ -73,7 +73,9 @@ router.patch('/dpst', async (req, res, next) => {
   const { user_id, point } = req.body;
   try {
     if (!user_id && !point) {
-      throw new Error('wrong input');
+      const error = new Error('wrong input');
+      error.status = 412;
+      throw error;
     }
     const findUser = await User.findOne(
       {
@@ -84,7 +86,9 @@ router.patch('/dpst', async (req, res, next) => {
       { t }
     );
     if (!findUser) {
-      throw new Error('no user found');
+      const error = new Error('no user found');
+      error.status = 400;
+      throw error;
     } else {
       await findUser.update({ point: findUser.point + parseInt(point) }, { t });
       await findUser.save({ t });
@@ -105,7 +109,7 @@ router.patch('/dpst', async (req, res, next) => {
   } catch (err) {
     await t.rollback();
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: `${user_id} user point deposit failure`,
     });
   }
@@ -117,7 +121,9 @@ router.patch('/wtdr', async (req, res, next) => {
   const { user_id, point } = req.body;
   try {
     if (!user_id && !point) {
-      throw new Error('wrong input');
+      const error = new Error('wrong input');
+      error.status = 412;
+      throw error;
     }
     const findUser = await User.findOne(
       {
@@ -128,10 +134,14 @@ router.patch('/wtdr', async (req, res, next) => {
       { t }
     );
     if (!findUser) {
-      throw new Error('no user found');
+      const error = new Error('no user found');
+      error.status = 400;
+      throw error;
     } else {
       if (findUser.point < parseInt(point)) {
-        throw new Error('too much to withdraw');
+        const error = new Error('too much to withdraw');
+        error.status = 430;
+        throw error;
       } else {
         await findUser.update(
           { point: findUser.point - parseInt(point) },
@@ -156,7 +166,7 @@ router.patch('/wtdr', async (req, res, next) => {
   } catch (err) {
     await t.rollback();
     console.error(err);
-    res.status(500).json({
+    res.status(err.status || 500).json({
       log: `${user_id} user point withdraw failure`,
     });
   }
