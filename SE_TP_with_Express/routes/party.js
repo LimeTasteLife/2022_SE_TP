@@ -331,27 +331,30 @@ router.post('/join', async (req, res, next) => {
     const findParty = await Party.findOne({
       where: { user_id: user_id, post_id: post_id },
     });
-    if (findParty.is_checked === true) {
-      const error = new Error('already joined');
-      error.status = 425;
+    if (!findParty) {
+      const error = new Error('');
+      error.status = 400;
       throw error;
+    } else {
+      if (findParty.is_checked === true) {
+        const error = new Error('already joined');
+        error.status = 425;
+        throw error;
+      }
+      const createParty = await Party.create(
+        {
+          content: content,
+          user_id: user_id,
+          transaction_point: transaction_point,
+        },
+        { t }
+      );
+      await findPost.addParty(createParty, { t });
+      await t.commit();
+      res.status(200).json({
+        log: 'party join success',
+      });
     }
-
-    const createParty = await Party.create(
-      {
-        content: content,
-        user_id: user_id,
-        transaction_point: transaction_point,
-      },
-      { t }
-    );
-
-    await findPost.addParty(createParty, { t });
-
-    await t.commit();
-    res.status(200).json({
-      log: 'party join success',
-    });
   } catch (err) {
     await t.rollback();
     console.error(err);
