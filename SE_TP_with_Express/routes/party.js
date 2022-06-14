@@ -16,7 +16,7 @@ router.get('/post', async (req, res, next) => {
     const { post_id } = req.query;
     if (!post_id) {
       const error = new Error('wrong input');
-      error.status(412);
+      error.status = 412;
       throw error;
     }
     const findPost = await Post.findOne({
@@ -24,12 +24,12 @@ router.get('/post', async (req, res, next) => {
     });
     if (findPost.cur_mem === findPost.mem_count) {
       const error = new Error('party already full');
-      error.status(421);
+      error.status = 421;
       throw error;
     }
     if (findPost.is_complete === true) {
       const error = new Error('post(party) already complete');
-      error.status(422);
+      error.status = 422;
       throw error;
     }
     const findParty = await Party.findAll({
@@ -45,7 +45,7 @@ router.get('/post', async (req, res, next) => {
 
     if (!findParty) {
       const error = new Error('no party found');
-      error.status(400);
+      error.status = 400;
       throw error;
     }
 
@@ -73,7 +73,7 @@ router.post('/accept', async (req, res, next) => {
     const { party_id } = req.body;
     if (!party_id) {
       const error = new Error('wrong input');
-      error.status(412);
+      error.status = 412;
       throw error;
     }
     const findParty = await Party.findOne({
@@ -81,12 +81,12 @@ router.post('/accept', async (req, res, next) => {
     });
     if (!findParty) {
       const error = new Error('no party found');
-      error.status(400);
+      error.status = 400;
       throw error;
     }
     if (findParty.is_checked === true) {
       const error = new Error('already joined');
-      error.status(425);
+      error.status = 425;
       throw error;
     }
     await Party.update(
@@ -99,7 +99,7 @@ router.post('/accept', async (req, res, next) => {
     });
     if (findUser.point < findParty.transaction_point) {
       const error = new Error('low point');
-      error.status(430);
+      error.status = 430;
       throw error;
     }
     await User.update(
@@ -113,12 +113,12 @@ router.post('/accept', async (req, res, next) => {
     });
     if (findPost.is_complete === true) {
       const error = new Error('Post(party) already complete');
-      error.status(422);
+      error.status = 422;
       throw error;
     }
     if (findPost.cur_mem >= findPost.mem_count) {
       const error = new Error('Post(party) already full');
-      error.status(421);
+      error.status = 421;
       throw error;
     }
     const createTransaction = await Transaction.create(
@@ -144,6 +144,7 @@ router.post('/accept', async (req, res, next) => {
         { t }
       );
     }
+    await findPost.addUser(findUser, { t });
     await t.commit();
     res.status(200).json({
       log: 'part accept success',
@@ -163,7 +164,7 @@ router.post('/complete', async (req, res, next) => {
     const { post_id } = req.body;
     if (!post_id) {
       const error = new Error('wrong input');
-      error.status(412);
+      error.status = 412;
       throw error;
     }
     const findPost = await Post.findOne(
@@ -174,7 +175,7 @@ router.post('/complete', async (req, res, next) => {
     );
     if (findPost.is_complete === true) {
       const error = new Error('Post(Party) already complete');
-      error.status(422);
+      error.status = 422;
       throw error;
     }
     await Post.update(
@@ -292,7 +293,7 @@ router.post('/join', async (req, res, next) => {
     const { user_id, post_id, transaction_point, content } = req.body;
     if (!user_id || !post_id || !content) {
       const error = new Error('wrong input');
-      error.status(412);
+      error.status = 412;
       throw error;
     }
 
@@ -301,12 +302,12 @@ router.post('/join', async (req, res, next) => {
     });
     if (!findUser) {
       const error = new Error('no user found');
-      error.status(400);
+      error.status = 400;
       throw error;
     }
     if (transaction_point > findUser.point) {
       const error = new Error('no point');
-      error.status(430);
+      error.status = 430;
       throw error;
     }
     const findPost = await Post.findOne({
@@ -314,17 +315,17 @@ router.post('/join', async (req, res, next) => {
     });
     if (!findPost) {
       const error = new Error('no post found');
-      error.status(400);
+      error.status = 400;
       throw error;
     }
     if (findPost.cur_mem === findPost.mem_count) {
       const error = new Error('party already full');
-      error.status(421);
+      error.status = 421;
       throw error;
     }
     if (findPost.is_complete === true) {
       const error = new Error('party already closed');
-      error.status(422);
+      error.status = 422;
       throw error;
     }
 
