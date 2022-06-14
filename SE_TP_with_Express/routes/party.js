@@ -328,6 +328,14 @@ router.post('/join', async (req, res, next) => {
       error.status = 422;
       throw error;
     }
+    const findParty = await Party.findOne({
+      where: { id: user_id },
+    });
+    if (findParty.is_checked === true) {
+      const error = new Error('already joined');
+      error.status = 425;
+      throw error;
+    }
 
     const createParty = await Party.create(
       {
